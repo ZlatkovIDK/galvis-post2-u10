@@ -1,0 +1,41 @@
+name: API Tests con Newman
+
+on: [push, pull_request]
+
+jobs:
+  api-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Compilar JAR (sin tests)
+        run: mvn -B package -DskipTests
+
+      - name: Iniciar aplicación en background
+        run: java -jar target/*.jar &
+
+      - name: Esperar que la app responda (health check)
+        run: |
+          for i in {1..20}; do
+            curl -sf http://localhost:8080/actuator/health && break
+            echo "Intento $i - esperando app..."
+            sleep 3
+          done
+
+      - name: Instalar Newman
+        run: npm install -g newman
+
+      - name: Ejecutar colección Postman con Newman
+        run: |
+          newman run postman/ColeccionToDo.json \
+            --environment postman/env-ci.json \
+            --reporters cli \
+            --bail
