@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tareas - ToDo App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: #c0392b; }
+        .tarea-item { border: 1px solid #ddd; padding: 10px 15px; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .tarea-item.completada { background: #f0fff0; text-decoration: line-through; color: #777; }
+        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .btn-primary { background: #c0392b; color: white; text-decoration: none; display: inline-block; }
+        .btn-completar { background: #27ae60; color: white; }
+        .btn-eliminar { background: #7f8c8d; color: white; }
+        #btn-nueva { padding: 10px 20px; background: #c0392b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+        .empty-msg { color: #999; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>Lista de Tareas</h1>
+    <a id="btn-nueva" href="/tareas/nueva">+ Nueva Tarea</a>
+
+    <div id="lista-tareas">
+        <div th:if="${#lists.isEmpty(tareas)}" class="empty-msg" id="sin-tareas">No hay tareas aún.</div>
+        <div th:each="t : ${tareas}"
+             th:classappend="${t.completada} ? 'completada' : ''"
+             class="tarea-item"
+             th:id="'tarea-' + ${t.id}">
+            <div>
+                <strong th:text="${t.titulo}" class="tarea-titulo"></strong>
+                <span th:if="${t.descripcion}" th:text="' — ' + ${t.descripcion}" class="tarea-desc"></span>
+                <span th:if="${t.completada}" style="color:green; margin-left:10px;">✔ Completada</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <form th:if="${!t.completada}" th:action="'/tareas/' + ${t.id} + '/completar'" method="post">
+                    <button class="btn btn-completar" type="submit">Completar</button>
+                </form>
+                <form th:action="'/tareas/' + ${t.id} + '/eliminar'" method="post">
+                    <button class="btn btn-eliminar" type="submit">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
